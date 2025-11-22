@@ -1,0 +1,145 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f4f8;
+    padding: 20px;
+    background: url('https://www.transparenttextures.com/patterns/cubes.png'),
+                linear-gradient(120deg, #db73ca, #66a6ff);
+    margin: 0;
+}
+
+/* Title */
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Form Container */
+.form-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+.form-container label {
+    font-weight: bold;
+    color: #444;
+}
+
+
+.form-container input,
+.form-container select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 15px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+
+.form-container textarea {
+    width: 100%;
+    min-height: 70px;
+    resize: vertical;
+    padding: 10px;
+    margin: 8px 0 15px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(to right, #4a90e2, #2c6ed5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    background: linear-gradient(to right, #2c6ed5, #1f56ac);
+    transform: scale(1.02);
+}
+
+
+.total {
+    max-width: 600px;
+    margin: 15px auto;
+    background: #e8f4ff;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+
+h3 {
+    text-align: center;
+    margin-top: 30px;
+}
+
+/* Table Styling */
+
+table {
+    width: 100%;
+    max-width: 700px;
+    margin: 20px auto;   
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.table-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+table th, 
+table td {
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 14px;
+}
+
+table th {
+    background: #4a90e2;
+    color: white;
+}
+
+table td {
+    color: #333;
+}
+
+tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+
+table button {
+    width: auto;
+    padding: 6px 10px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+@media (max-width: 600px) {
+    .form-container {
+        margin: 10px;
+    }
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daily Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Daily Expense Tracker</h2>
+
+<div class="form-container">
+
+    <label>Amount:</label>
+    <input id="amount" type="number" placeholder="Enter amount" />
+
+    <label>Category:</label>
+    <select id="category">
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Bills</option>
+        <option>Shopping</option>
+        <option>Entertainment</option>
+        <option>Health</option>
+        <option>Other</option>
+    </select>
+
+    <label>Date:</label>
+    <input id="date" type="date" />
+
+    <label>Description:</label>
+    <textarea id="desc" placeholder="Description"></textarea>
+
+
+    <label>Payment Method:</label>
+    <select id="method">
+        <option>Cash</option>
+        <option>Card</option>
+        <option>UPI</option>
+        <option>Net Banking</option>
+    </select>
+
+    <button id="addBtn">Add Expense</button>
+</div>
+
+<div class="total">
+    <strong>Today's Total: Rs. <span id="todayTotal">0</span></strong><br>
+    <strong>This Week: Rs. <span id="weekTotal">0</span> </strong><br>
+    <strong>This Month: Rs. <span id="monthTotal">0</span></strong>
+</div>
+
+<h3>Expenses</h3>
+<div class="table-wrapper">
+<table id="expenseTable">
+    <thead>
+        <tr>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Method</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
