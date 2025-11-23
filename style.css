@@ -7,8 +7,7 @@ body {
     font-family: Arial, sans-serif;
     background: #f2f4f8;
     padding: 20px;
-    background: url('https://www.transparenttextures.com/patterns/cubes.png'),
-                linear-gradient(120deg, #db73ca, #66a6ff);
+    background:linear-gradient(120deg, #db73ca, #66a6ff);
     margin: 0;
 }
 
