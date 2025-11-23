@@ -1,6 +1,10 @@
 let expenses = [];
 
+// Event Listeners
 document.getElementById("addBtn").addEventListener("click", addExpense);
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("filterCategory").addEventListener("change", applyFilters);
+document.getElementById("sortAmount").addEventListener("change", applyFilters);
 
 function addExpense() {
     let amount = parseFloat(document.getElementById("amount").value);
@@ -31,16 +35,17 @@ function addExpense() {
     };
 
     expenses.push(expense);
-    displayExpenses();
+    applyFilters();
     calculateTotals();
     clearForm();
 }
 
-function displayExpenses() {
+
+function displayExpenses(filteredExpenses) {
     let tableBody = document.getElementById("tableBody");
     tableBody.innerHTML = "";
 
-    expenses.forEach(exp => {
+    filteredExpenses.forEach(exp => {
         tableBody.innerHTML += `
             <tr>
                 <td>${exp.amount}</td>
@@ -57,11 +62,13 @@ function displayExpenses() {
     });
 }
 
+
 function deleteExpense(id) {
     expenses = expenses.filter(exp => exp.id !== id);
-    displayExpenses();
+    applyFilters();
     calculateTotals();
 }
+
 
 function editExpense(id) {
     let exp = expenses.find(e => e.id === id);
@@ -74,6 +81,7 @@ function editExpense(id) {
 
     deleteExpense(id);
 }
+
 
 function calculateTotals() {
     let today = new Date();
@@ -91,17 +99,9 @@ function calculateTotals() {
     expenses.forEach(exp => {
         let expDate = new Date(exp.date);
 
-        if (exp.date === todayStr) {
-            todayTotal += exp.amount;
-        }
-
-        if (expDate >= startOfWeek) {
-            weekTotal += exp.amount;
-        }
-
-        if (expDate >= startOfMonth) {
-            monthTotal += exp.amount;
-        }
+        if (exp.date === todayStr) todayTotal += exp.amount;
+        if (expDate >= startOfWeek) weekTotal += exp.amount;
+        if (expDate >= startOfMonth) monthTotal += exp.amount;
     });
 
     document.getElementById("todayTotal").textContent = todayTotal.toFixed(2);
@@ -110,7 +110,30 @@ function calculateTotals() {
 }
 
 
+function applyFilters() {
+    let searchText = document.getElementById("searchInput").value.toLowerCase();
+    let selectedCategory = document.getElementById("filterCategory").value;
+    let sortOption = document.getElementById("sortAmount").value;
+
+    let filtered = expenses.filter(exp => {
+        let matchDesc = exp.desc.toLowerCase().includes(searchText);
+        let matchCategory = selectedCategory === "" || exp.category === selectedCategory;
+        return matchDesc && matchCategory;
+    });
+
+    if (sortOption === "low") {
+        filtered.sort((a, b) => a.amount - b.amount);
+    } 
+    else if (sortOption === "high") {
+        filtered.sort((a, b) => b.amount - a.amount);
+    }
+
+    displayExpenses(filtered);
+}
+
+
 function clearForm() {
     document.getElementById("amount").value = "";
     document.getElementById("desc").value = "";
+    document.getElementById("date").value = "";
 }

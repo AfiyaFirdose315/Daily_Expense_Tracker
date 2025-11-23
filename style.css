@@ -93,6 +93,23 @@ h3 {
     margin-top: 30px;
 }
 
+.filters {
+    max-width: 800px;
+    margin: 15px auto;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.filters input,
+.filters select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+
 /* Table Styling */
 
 table {
