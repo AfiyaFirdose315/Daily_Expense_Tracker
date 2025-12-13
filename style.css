@@ -91,9 +91,12 @@ table {
     width: 100%;
     max-width: 700px;
     margin: 20px auto;
-    border-collapse: collapse;
+    border-collapse: separate; 
+    border-spacing: 0; 
     background: white;
     box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    border-radius: 12px; 
+    overflow: hidden; 
 }
 
 table th,
