@@ -98,6 +98,23 @@ function updateCategoryBudgetUI() {
     }
 }
 
+function updateCategoryBars(categoryTotals) {
+    let total = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
+    let output = "<h3>Category Breakdown</h3>";
+
+    for (let cat in categoryTotals) {
+        let percent = (categoryTotals[cat] / total) * 100;
+        output += `
+            <div class='bar-row'>
+                <strong>${cat} (${percent.toFixed(1)}%)</strong>
+                <div class='bar'> <div class='fill' style='width:${percent}%;'></div> </div>
+            </div>
+        `;
+    }
+
+    document.getElementById("categoryBreakdown").innerHTML = output;
+}
+
 // ------------------- Expenses -------------------
 function addExpense() {
     let amount = Number(document.getElementById("amount").value);
@@ -150,7 +167,7 @@ function clearExpenseForm() {
     document.getElementById("date").value = "";
 }
 
-// ------------------- Totals & Analytics -------------------
+// ------------------- Totals -------------------
 function calculateTotals() {
     let today = new Date().toISOString().split("T")[0];
     let startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
@@ -176,7 +193,7 @@ function calculateTotals() {
     updateCategoryTotals(categoryTotals);
     updateMonthlyBudgetUI();
     updateBalance();
-    updateAnalytics(categoryTotals);
+  
 }
 
 function updateCategoryTotals(categoryTotals) {
@@ -185,20 +202,9 @@ function updateCategoryTotals(categoryTotals) {
     for (let cat in categoryTotals) {
         tbody.innerHTML += `<tr><td>${cat}</td><td>₹${categoryTotals[cat].toFixed(2)}</td></tr>`;
     }
+    updateCategoryBars(categoryTotals);
 }
 
-function updateAnalytics(categoryTotals) {
-    if (!categoryTotals) return;
-    let total = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
-    let avgDaily = total / 30;
-    let highestCat = Object.keys(categoryTotals).reduce((a, b) => categoryTotals[a] > categoryTotals[b] ? a : b);
-
-    let analytics = `
-        <p>Average Daily Spending: ₹${avgDaily.toFixed(2)}</p>
-        <p>Most Expensive Category: ${highestCat} (₹${categoryTotals[highestCat].toFixed(2)})</p>
-    `;
-    document.getElementById("analytics").innerHTML = analytics;
-}
 
 // ------------------- Edit/Delete -------------------
 function editExpense(id) {
@@ -222,28 +228,3 @@ function deleteExpense(id) {
     updateCategoryBudgetUI();
 }
 
-// ------------------- Export/Import -------------------
-function exportData() {
-    const dataStr = JSON.stringify({ expenses, incomes, monthlyBudget, categoryBudgets, accounts });
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "data.json"; a.click();
-    URL.revokeObjectURL(url);
-}
-
-function importData() {
-    const file = document.getElementById("importFile").files[0];
-    if (!file) return alert("Select a file");
-    const reader = new FileReader();
-    reader.onload = e => {
-        const data = JSON.parse(e.target.result);
-        expenses = data.expenses || [];
-        incomes = data.incomes || [];
-        monthlyBudget = data.monthlyBudget || 0;
-        categoryBudgets = data.categoryBudgets || {};
-        accounts = data.accounts || { Wallet:0, Bank:0, Savings:0 };
-        renderExpenses(); calculateTotals(); updateCategoryBudgetUI();
-    };
-    reader.readAsText(file);
-}
