@@ -1,4 +1,3 @@
-
 * {
     box-sizing: border-box;
 }
@@ -7,18 +6,16 @@ body {
     font-family: Arial, sans-serif;
     background: #f2f4f8;
     padding: 20px;
-    background:linear-gradient(120deg, #db73ca, #66a6ff);
+    background: linear-gradient(120deg, #bda9ba, #bdd0f0);
     margin: 0;
 }
 
-/* Title */
 h2 {
     text-align: center;
     color: #333;
     margin-bottom: 20px;
 }
 
-/* Form Container */
 .form-container {
     background: white;
     padding: 20px;
@@ -33,7 +30,6 @@ h2 {
     color: #444;
 }
 
-
 .form-container input,
 .form-container select {
     width: 100%;
@@ -43,7 +39,6 @@ h2 {
     border: 1px solid #ccc;
     border-radius: 6px;
 }
-
 
 .form-container textarea {
     width: 100%;
@@ -56,7 +51,6 @@ h2 {
     border-radius: 6px;
 }
 
-/* Buttons */
 button {
     width: 100%;
     padding: 12px;
@@ -74,58 +68,35 @@ button:hover {
     transform: scale(1.02);
 }
 
+h3 { 
+    text-align: center; margin-top: 30px; 
+}
 
-.total {
-    max-width: 600px;
-    margin: 15px auto;
-    background: #e8f4ff;
-    padding: 12px;
+/* Summary cards */
+.summary-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+.summary-container .card {
+    padding: 10px 15px;
+    background: #f2f2f2;
     border-radius: 8px;
-    font-size: 15px;
-    text-align: center;
     font-weight: bold;
 }
 
-
-h3 {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.filters {
-    max-width: 800px;
-    margin: 15px auto;
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-}
-
-.filters input,
-.filters select {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-}
-
-
-/* Table Styling */
-
+/* Table styling */
 table {
     width: 100%;
     max-width: 700px;
-    margin: 20px auto;   
+    margin: 20px auto;
     border-collapse: collapse;
     background: white;
     box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
 
-.table-wrapper {
-    display: flex;
-    justify-content: center;
-}
-
-table th, 
+table th,
 table td {
     border: 1px solid #ddd;
     padding: 10px 12px;
@@ -138,14 +109,9 @@ table th {
     color: white;
 }
 
-table td {
-    color: #333;
-}
-
 tr:nth-child(even) {
     background: #f9f9f9;
 }
-
 
 table button {
     width: auto;
@@ -154,8 +120,38 @@ table button {
     margin: 2px;
 }
 
+/* Bars */
+.bar-row {
+    margin: 8px 0;
+}
+
+.bar {
+    background: #eee;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 10px;
+    background: #4a90e2;
+}
+
+/* Budget section */
+#budgetFill {
+    height: 10px;
+    border-radius: 5px;
+    transition: width 0.4s ease, background 0.4s ease;
+}
+
 @media (max-width: 600px) {
     .form-container {
         margin: 10px;
     }
 }
+
+/* Analytics */
+#analytics p { margin: 5px 0; font-size: 14px; }
+
+/* File input */
+input[type=file] { margin-top: 10px; margin-bottom: 10px; }

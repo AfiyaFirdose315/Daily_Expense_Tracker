@@ -8,10 +8,96 @@
 
 <h2>Daily Expense Tracker</h2>
 
-<div class="form-container">
+<!-- Summary Cards -->
+<div class="summary-container">
+    <div class="card" id="todayTotal">Today: ₹0</div>
+    <div class="card" id="weekTotal">This Week: ₹0</div>
+    <div class="card" id="monthTotal">This Month: ₹0</div>
+    <div class="card" id="totalTransactions">Transactions: 0</div>
+</div>
 
+<!-- Income Section -->
+<h3>Income</h3>
+<div class="form-container">
+    <label>Income Amount:</label>
+    <input id="incomeAmount" type="number">
+
+    <label>Income Category:</label>
+    <select id="incomeCategory">
+        <option>Salary</option>
+        <option>Freelance</option>
+        <option>Other</option>
+    </select>
+
+    <label>Account:</label>
+    <select id="incomeAccount">
+        <option>Wallet</option>
+        <option>Bank</option>
+        <option>Savings</option>
+    </select>
+
+    <label>Date:</label>
+    <input id="incomeDate" type="date">
+
+    <button id="addIncomeBtn">Add Income</button>
+
+    <p><strong>Total Income:</strong> ₹<span id="totalIncome">0</span></p>
+    <p><strong>Balance:</strong> ₹<span id="balance">0</span></p>
+</div>
+
+<!-- Monthly Budget -->
+<h3>Monthly Budget</h3>
+<div class="form-container">
+    <label>Set Monthly Budget (₹):</label>
+    <input id="monthlyBudgetInput" type="number">
+    <button id="setBudgetBtn">Save Budget</button>
+
+    <p><strong>Budget:</strong> ₹<span id="budgetAmount">0</span></p>
+    <p><strong>Spent:</strong> ₹<span id="budgetSpent">0</span></p>
+    <p><strong>Remaining:</strong> ₹<span id="budgetRemaining">0</span></p>
+
+    <div class="bar">
+        <div id="budgetFill" class="fill"></div>
+    </div>
+</div>
+
+<!-- Category Budget -->
+<h3>Category Budget</h3>
+<div class="form-container">
+    <label>Category:</label>
+    <select id="budgetCategory">
+        <option>Food</option>
+        <option>Transport</option>
+        <option>Bills</option>
+        <option>Shopping</option>
+        <option>Entertainment</option>
+        <option>Health</option>
+        <option>Other</option>
+    </select>
+
+    <label>Budget Amount (₹):</label>
+    <input id="categoryBudgetInput" type="number">
+    <button id="setCategoryBudgetBtn">Save Category Budget</button>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Budget</th>
+            <th>Spent</th>
+            <th>Remaining</th>
+            <th>Usage</th>
+        </tr>
+    </thead>
+    <tbody id="categoryBudgetBody"></tbody>
+</table>
+
+<!-- Expense Form -->
+<h3>Add Expense</h3>
+<div class="form-container">
     <label>Amount:</label>
-    <input id="amount" type="number" placeholder="Enter amount" />
+    <input id="amount" type="number">
 
     <label>Category:</label>
     <select id="category">
@@ -24,11 +110,18 @@
         <option>Other</option>
     </select>
 
+    <label>Account:</label>
+    <select id="expenseAccount">
+        <option>Wallet</option>
+        <option>Bank</option>
+        <option>Savings</option>
+    </select>
+
     <label>Date:</label>
-    <input id="date" type="date" />
+    <input id="date" type="date">
 
     <label>Description:</label>
-    <textarea id="desc" placeholder="Description"></textarea>
+    <textarea id="desc"></textarea>
 
     <label>Payment Method:</label>
     <select id="method">
@@ -38,55 +131,56 @@
         <option>Net Banking</option>
     </select>
 
+    <label>Recurring:</label>
+    <select id="recurring">
+        <option value="none">None</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+    </select>
+
     <button id="addBtn">Add Expense</button>
 </div>
 
-
-<div class="total">
-    <strong>Today's Total: Rs. <span id="todayTotal">0</span></strong><br>
-    <strong>This Week: Rs. <span id="weekTotal">0</span> </strong><br>
-    <strong>This Month: Rs. <span id="monthTotal">0</span></strong>
-</div>
-<div class="filters">
-    <input type="text" id="searchInput" placeholder="Search by description...">
-
-    <select id="filterCategory">
-        <option value="">Search by category</option>
-        <option>Food</option>
-        <option>Transport</option>
-        <option>Bills</option>
-        <option>Shopping</option>
-        <option>Entertainment</option>
-        <option>Health</option>
-        <option>Other</option>
-    </select>
-
-    <select id="sortAmount">
-        <option value="">Sort by Amount</option>
-        <option value="low">Low to High</option>
-        <option value="high">High to Low</option>
-    </select>
-</div>
-
-<h3>Expenses</h3>
-
-<div class="table-wrapper">
-<table id="expenseTable">
+<table>
     <thead>
         <tr>
             <th>Amount</th>
             <th>Category</th>
+            <th>Account</th>
             <th>Date</th>
             <th>Description</th>
             <th>Method</th>
+            <th>Recurring</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody id="tableBody"></tbody>
 </table>
+
+<h3>Category Totals</h3>
+<table id="categoryTotalsTable">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Total (₹)</th>
+        </tr>
+    </thead>
+    <tbody id="categoryTotalsBody"></tbody>
+</table>
+
+<!-- Analytics -->
+<h3>Analytics</h3>
+<div class="form-container" id="analytics"></div>
+
+<!-- Export/Import -->
+<h3>Data Backup</h3>
+<div class="form-container">
+    <button id="exportBtn">Export Data (JSON)</button>
+    <input type="file" id="importFile">
+    <button id="importBtn">Import Data</button>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
