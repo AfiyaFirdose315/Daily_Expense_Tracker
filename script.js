@@ -2,95 +2,71 @@ let expenses = [];
 let incomes = [];
 let monthlyBudget = 0;
 let categoryBudgets = {};
-let accounts = { Wallet: 0, Bank: 0, Savings: 0 };
 
-// --- Event listeners ---
-document.getElementById("addBtn").addEventListener("click", addExpense);
-document.getElementById("setBudgetBtn").addEventListener("click", saveMonthlyBudget);
-document.getElementById("setCategoryBudgetBtn").addEventListener("click", saveCategoryBudget);
-document.getElementById("addIncomeBtn").addEventListener("click", addIncome);
-document.getElementById("exportBtn").addEventListener("click", exportData);
-document.getElementById("importBtn").addEventListener("click", importData);
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("addBtn").addEventListener("click", addExpense);
+    document.getElementById("addIncomeBtn").addEventListener("click", addIncome);
+    document.getElementById("setBudgetBtn").addEventListener("click", saveMonthlyBudget);
+    document.getElementById("setCategoryBudgetBtn").addEventListener("click", saveCategoryBudget);
+    exportBtn.addEventListener("click", exportData);
+    importBtn.addEventListener("click", importData);
+});
 
-// ------------------- Income -------------------
-function addIncome() {
-    let income = {
-        amount: Number(document.getElementById("incomeAmount").value),
-        category: document.getElementById("incomeCategory").value,
-        account: document.getElementById("incomeAccount").value,
-        date: document.getElementById("incomeDate").value
-    };
-
-    if (income.amount <= 0) return alert("Invalid income");
-
-    incomes.push(income);
-    accounts[income.account] += income.amount;
-
-    updateIncomeUI();
-    document.getElementById("incomeAmount").value = "";
-    document.getElementById("incomeDate").value = "";
+function openSection(id) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".side-tab").forEach(b => b.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    event.target.classList.add("active");
 }
 
-function updateIncomeUI() {
-    let totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
-    document.getElementById("totalIncome").textContent = totalIncome.toFixed(2);
+/* Income */
+function addIncome() {
+    const amount = Number(incomeAmount.value);
+    const date = incomeDate.value;
+    if (!amount || !date) return alert("Enter valid income");
+    incomes.push({ amount });
+    totalIncome.textContent = incomes.reduce((s, i) => s + i.amount, 0);
     updateBalance();
 }
 
-// ------------------- Balance -------------------
-function updateBalance() {
-    let incomeTotal = incomes.reduce((s, i) => s + i.amount, 0);
-    let expenseTotal = expenses.reduce((s, e) => s + e.amount, 0);
-    let balance = incomeTotal - expenseTotal;
-    document.getElementById("balance").textContent = balance.toFixed(2);
-}
-
-// ------------------- Monthly Budget -------------------
+/* Monthly Budget */
 function saveMonthlyBudget() {
-    monthlyBudget = Number(document.getElementById("monthlyBudgetInput").value);
-    document.getElementById("budgetAmount").textContent = monthlyBudget.toFixed(2);
-    updateMonthlyBudgetUI();
-    document.getElementById("monthlyBudgetInput").value = "";
+    monthlyBudget = Number(monthlyBudgetInput.value);
+    budgetAmount.textContent = monthlyBudget;
+    updateMonthlyBudget();
 }
 
-function updateMonthlyBudgetUI() {
-    if (!monthlyBudget) return;
-    let monthSpent = expenses.reduce((s, e) => s + e.amount, 0);
-    document.getElementById("budgetSpent").textContent = monthSpent.toFixed(2);
-    document.getElementById("budgetRemaining").textContent = (monthlyBudget - monthSpent).toFixed(2);
-    let fill = document.getElementById("budgetFill");
-    let percent = (monthSpent / monthlyBudget) * 100;
-    fill.style.width = percent + "%";
-    fill.style.background = percent < 80 ? "green" : percent < 90 ? "orange" : "red";
+function updateMonthlyBudget() {
+    const spent = expenses.reduce((s, e) => s + e.amount, 0);
+    budgetSpent.textContent = spent;
+    budgetRemaining.textContent = monthlyBudget - spent;
+    budgetFill.style.width = (spent / monthlyBudget) * 100 + "%";
 }
 
-// ------------------- Category Budget -------------------
+/* Category Budget */
 function saveCategoryBudget() {
-    let cat = document.getElementById("budgetCategory").value;
-    let amount = Number(document.getElementById("categoryBudgetInput").value);
-    if (amount <= 0) return alert("Enter a valid category budget");
-    categoryBudgets[cat] = amount;
+    const cat = budgetCategory.value;
+    const amt = Number(categoryBudgetInput.value);
+    if (!amt) return alert("Invalid amount");
+    categoryBudgets[cat] = amt;
     updateCategoryBudgetUI();
-    document.getElementById("categoryBudgetInput").value = "";
 }
 
 function updateCategoryBudgetUI() {
-    let tbody = document.getElementById("categoryBudgetBody");
-    tbody.innerHTML = "";
+    categoryBudgetBody.innerHTML = "";
     for (let cat in categoryBudgets) {
-        let spent = expenses.filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0);
-        let budget = categoryBudgets[cat];
-        let percent = (spent / budget) * 100;
-        let color = percent < 80 ? "green" : percent < 90 ? "orange" : "red";
-        tbody.innerHTML += `
+        const spent = expenses.filter(e => e.category === cat)
+                              .reduce((s, e) => s + e.amount, 0);
+        const percent = (spent / categoryBudgets[cat]) * 100;
+        categoryBudgetBody.innerHTML += `
             <tr>
                 <td>${cat}</td>
-                <td>₹${budget.toFixed(2)}</td>
-                <td>₹${spent.toFixed(2)}</td>
-                <td>₹${(budget - spent).toFixed(2)}</td>
+                <td>₹${categoryBudgets[cat]}</td>
+                <td>₹${spent}</td>
+                <td>₹${categoryBudgets[cat] - spent}</td>
                 <td>
                     <div class="bar">
-                        <div class="fill" style="width:${percent}%;background:${color}"></div>
+                        <div class="fill" style="width:${percent}%"></div>
                     </div>
                 </td>
             </tr>
@@ -98,133 +74,75 @@ function updateCategoryBudgetUI() {
     }
 }
 
-function updateCategoryBars(categoryTotals) {
-    let total = Object.values(categoryTotals).reduce((a, b) => a + b, 0);
-    let output = "<h3>Category Breakdown</h3>";
-
-    for (let cat in categoryTotals) {
-        let percent = (categoryTotals[cat] / total) * 100;
-        output += `
-            <div class='bar-row'>
-                <strong>${cat} (${percent.toFixed(1)}%)</strong>
-                <div class='bar'> <div class='fill' style='width:${percent}%;'></div> </div>
-            </div>
-        `;
-    }
-
-    document.getElementById("categoryBreakdown").innerHTML = output;
-}
-
-// ------------------- Expenses -------------------
+/* Expenses */
 function addExpense() {
-    let amount = Number(document.getElementById("amount").value);
-    let category = document.getElementById("category").value;
-    let account = document.getElementById("expenseAccount").value;
-    let date = document.getElementById("date").value;
-    let desc = document.getElementById("desc").value;
-    let method = document.getElementById("method").value;
-    let recurring = document.getElementById("recurring").value;
-
-    if (!amount || amount <= 0) return alert("Amount must be positive");
-    let today = new Date().toISOString().split("T")[0];
-    if (!date || date > today) return alert("Enter valid date");
-
-    let exp = { id: Date.now(), amount, category, account, date, desc, method, recurring };
-    expenses.push(exp);
-    accounts[account] -= amount;
-
+    const amount = Number(amount.value);
+    const category = category.value;
+    if (!amount) return alert("Invalid expense");
+    expenses.push({ amount, category });
     renderExpenses();
-    calculateTotals();
+    updateMonthlyBudget();
     updateCategoryBudgetUI();
-    clearExpenseForm();
 }
 
-function renderExpenses(filteredExpenses = expenses) {
-    let tbody = document.getElementById("tableBody");
-    tbody.innerHTML = "";
-    filteredExpenses.forEach(e => {
-        tbody.innerHTML += `
+function renderExpenses() {
+    tableBody.innerHTML = "";
+    expenses.forEach(e => {
+        tableBody.innerHTML += `
             <tr>
                 <td>${e.amount}</td>
                 <td>${e.category}</td>
-                <td>${e.account}</td>
-                <td>${e.date}</td>
-                <td>${e.desc}</td>
-                <td>${e.method}</td>
-                <td>${e.recurring}</td>
-                <td>
-                    <button onclick="editExpense(${e.id})">Edit</button>
-                    <button onclick="deleteExpense(${e.id})">Delete</button>
-                </td>
+                <td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                <td>-</td>
             </tr>
         `;
     });
 }
 
-function clearExpenseForm() {
-    document.getElementById("amount").value = "";
-    document.getElementById("desc").value = "";
-    document.getElementById("date").value = "";
+function updateBalance() {
+    const income = incomes.reduce((s, i) => s + i.amount, 0);
+    const expense = expenses.reduce((s, e) => s + e.amount, 0);
+    balance.textContent = income - expense;
 }
 
-// ------------------- Totals -------------------
-function calculateTotals() {
-    let today = new Date().toISOString().split("T")[0];
-    let startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    let startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+function exportData() {
+    const data = {
+        expenses,
+        incomes,
+        monthlyBudget,
+        categoryBudgets
+    };
 
-    let todayTotal = 0, weekTotal = 0, monthTotal = 0;
-    let categoryTotals = {};
-
-    expenses.forEach(exp => {
-        let expDate = new Date(exp.date);
-        if (exp.date === today) todayTotal += exp.amount;
-        if (expDate >= startOfWeek) weekTotal += exp.amount;
-        if (expDate >= startOfMonth) monthTotal += exp.amount;
-
-        categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amount;
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json"
     });
 
-    document.getElementById("todayTotal").textContent = `Today: ₹${todayTotal.toFixed(2)}`;
-    document.getElementById("weekTotal").textContent = `This Week: ₹${weekTotal.toFixed(2)}`;
-    document.getElementById("monthTotal").textContent = `This Month: ₹${monthTotal.toFixed(2)}`;
-    document.getElementById("totalTransactions").textContent = `Transactions: ${expenses.length}`;
-
-    updateCategoryTotals(categoryTotals);
-    updateMonthlyBudgetUI();
-    updateBalance();
-  
-}
-
-function updateCategoryTotals(categoryTotals) {
-    let tbody = document.getElementById("categoryTotalsBody");
-    tbody.innerHTML = "";
-    for (let cat in categoryTotals) {
-        tbody.innerHTML += `<tr><td>${cat}</td><td>₹${categoryTotals[cat].toFixed(2)}</td></tr>`;
-    }
-    updateCategoryBars(categoryTotals);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "expense-tracker-data.json";
+    a.click();
 }
 
 
-// ------------------- Edit/Delete -------------------
-function editExpense(id) {
-    let exp = expenses.find(e => e.id === id);
-    document.getElementById("amount").value = exp.amount;
-    document.getElementById("category").value = exp.category;
-    document.getElementById("expenseAccount").value = exp.account;
-    document.getElementById("date").value = exp.date;
-    document.getElementById("desc").value = exp.desc;
-    document.getElementById("method").value = exp.method;
-    document.getElementById("recurring").value = exp.recurring;
-    deleteExpense(id);
-}
+function importData() {
+    const file = importFile.files[0];
+    if (!file) return alert("Select a file first");
 
-function deleteExpense(id) {
-    let exp = expenses.find(e => e.id === id);
-    if (exp) accounts[exp.account] += exp.amount;
-    expenses = expenses.filter(e => e.id !== id);
-    renderExpenses();
-    calculateTotals();
-    updateCategoryBudgetUI();
-}
+    const reader = new FileReader();
+    reader.onload = () => {
+        const data = JSON.parse(reader.result);
 
+        expenses = data.expenses || [];
+        incomes = data.incomes || [];
+        monthlyBudget = data.monthlyBudget || 0;
+        categoryBudgets = data.categoryBudgets || {};
+
+        renderExpenses();
+        updateMonthlyBudget();
+        updateCategoryBudgetUI();
+        updateBalance();
+
+        alert("Data imported successfully");
+    };
+    reader.readAsText(file);
+}
