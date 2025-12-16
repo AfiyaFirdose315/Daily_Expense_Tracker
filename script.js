@@ -76,28 +76,74 @@ function updateCategoryBudgetUI() {
 
 /* Expenses */
 function addExpense() {
-    const amount = Number(amount.value);
-    const category = category.value;
-    if (!amount) return alert("Invalid expense");
-    expenses.push({ amount, category });
+    const amountInput = document.getElementById("amount");
+    const categoryInput = document.getElementById("category");
+    const accountInput = document.getElementById("expenseAccount");
+    const dateInput = document.getElementById("date");
+    const descInput = document.getElementById("desc");
+    const methodInput = document.getElementById("method");
+    const recurringInput = document.getElementById("recurring");
+
+    const amt = Number(amountInput.value);
+
+    if (!amt || amt <= 0) {
+        alert("Enter valid amount");
+        return;
+    }
+
+    const expense = {
+        amount: amt,
+        category: categoryInput.value,
+        account: accountInput.value,
+        date: dateInput.value,
+        desc: descInput.value,
+        method: methodInput.value,
+        recurring: recurringInput.value
+    };
+
+    expenses.push(expense);
+
     renderExpenses();
     updateMonthlyBudget();
     updateCategoryBudgetUI();
+    updateBalance();
+
+    // Clear form
+    amountInput.value = "";
+    descInput.value = "";
 }
+
+
 
 function renderExpenses() {
     tableBody.innerHTML = "";
-    expenses.forEach(e => {
+
+    expenses.forEach((e, index) => {
         tableBody.innerHTML += `
             <tr>
                 <td>${e.amount}</td>
                 <td>${e.category}</td>
-                <td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
-                <td>-</td>
+                <td>${e.account}</td>
+                <td>${e.date || "-"}</td>
+                <td>${e.desc || "-"}</td>
+                <td>${e.method}</td>
+                <td>${e.recurring}</td>
+                <td>
+                    <button onclick="deleteExpense(${index})">Delete</button>
+                </td>
             </tr>
         `;
     });
 }
+
+function deleteExpense(index) {
+    expenses.splice(index, 1);
+    renderExpenses();
+    updateMonthlyBudget();
+    updateCategoryBudgetUI();
+    updateBalance();
+}
+
 
 function updateBalance() {
     const income = incomes.reduce((s, i) => s + i.amount, 0);
