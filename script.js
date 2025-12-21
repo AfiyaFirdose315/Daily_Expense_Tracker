@@ -3,7 +3,16 @@ let incomes = [];
 let monthlyBudget = 0;
 let categoryBudgets = {};
 let bills = [];
-let budgetAlertLevel = 0; // prevents repeated alerts
+let budgetAlertLevel = 0;
+let shownAlerts = {};
+
+function alertOnce(msg) {
+    if (!shownAlerts[msg]) {
+        alert(msg);
+        shownAlerts[msg] = true;
+    }
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
     addBtn.addEventListener("click", addExpense);
@@ -45,32 +54,46 @@ function saveMonthlyBudget() {
 
 function updateMonthlyBudget() {
     const spent = expenses.reduce((s, e) => s + e.amount, 0);
-    const remaining = monthlyBudget - spent;
 
     budgetSpent.textContent = spent;
-    budgetRemaining.textContent = remaining;
+    budgetRemaining.textContent = monthlyBudget - spent;
 
-    let percent = monthlyBudget ? (spent / monthlyBudget) * 100 : 0;
+    if (!monthlyBudget || monthlyBudget <= 0) {
+        budgetFill.style.width = "0%";
+        budgetPercent.textContent = "0% used";
+        return;
+    }
+
+    const percent = Math.min((spent / monthlyBudget) * 100, 100);
     budgetFill.style.width = percent + "%";
+    budgetPercent.textContent = `${percent.toFixed(0)}% used`;
 
-    applyBudgetColors(percent, budgetFill);
-    showBudgetAlerts(percent);
+    
+    if (percent < 80) {
+        budgetFill.style.background = "green";
+    } else if (percent < 90) {
+        budgetFill.style.background = "orange";
+        alertOnce("⚠️ You have used 80% of your budget!");
+    } else {
+        budgetFill.style.background = "red";
+        alertOnce("🚨 Budget limit almost reached!");
+    }
 
-    // Prediction
     const daysPassed = new Date().getDate();
-    if (daysPassed > 0 && monthlyBudget) {
+    if (daysPassed > 0) {
         const dailyAvg = spent / daysPassed;
         const daysInMonth = new Date(
             new Date().getFullYear(),
             new Date().getMonth() + 1,
             0
         ).getDate();
+
         predictedBalance.textContent =
             (monthlyBudget - dailyAvg * daysInMonth).toFixed(2);
     }
 }
 
-/* ---------- COLOR & ALERTS ---------- */
+
 function applyBudgetColors(percent, el) {
     if (percent < 80) el.style.background = "green";
     else if (percent < 90) el.style.background = "orange";
@@ -191,6 +214,16 @@ function renderExpenses() {
         `;
     });
 }
+
+function deleteExpense(i) {
+    expenses.splice(i, 1);
+    renderExpenses();
+    updateMonthlyBudget();
+    updateCategoryBudgetUI();
+    updateBalance();
+    updateSummary();
+}
+
 
 /* ---------------- FILTERING ---------------- */
 function applyFilters() {
