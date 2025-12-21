@@ -17,7 +17,9 @@
             <button class="side-tab active" onclick="openSection('expenses')">Expenses</button>
             <button class="side-tab" onclick="openSection('income')">Income</button>
             <button class="side-tab" onclick="openSection('budget')">Budget</button>
+            <button class="side-tab" onclick="openSection('bills')">Bills</button>
             <button class="side-tab" onclick="openSection('summary')">Summary</button>
+            <button class="side-tab" onclick="openSection('data')">Import/Export Data</button>
         </div>
 
         <!-- CONTENT -->
@@ -55,6 +57,13 @@
                     <label>Description</label>
                     <textarea id="desc"></textarea>
 
+    
+                    <label>Tags</label>
+                    <input id="tags" placeholder="food, office">
+
+                    <label>Receipt</label>
+                    <input id="receipt" type="file">
+
                     <label>Payment Method</label>
                     <select id="method">
                         <option>Cash</option>
@@ -73,6 +82,41 @@
 
                     <button id="addBtn">Add Expense</button>
                 </div>
+                <h4><center>Filter Expenses</center></h4>
+                    <div class="form-container">
+                        <label>Date Filter</label>
+                        <select id="dateFilter">
+                            <option value="all">All</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+
+                        <label>Category</label>
+                        <select id="filterCategory">
+                            <option value="all">All</option>
+                            <option>Food</option>
+                            <option>Transport</option>
+                            <option>Bills</option>
+                            <option>Shopping</option>
+                            <option>Entertainment</option>
+                            <option>Health</option>
+                            <option>Other</option>
+                        </select>
+
+                        <label>Payment Method</label>
+                        <select id="filterMethod">
+                            <option value="all">All</option>
+                            <option>Cash</option>
+                            <option>Card</option>
+                            <option>UPI</option>
+                            <option>Net Banking</option>
+                        </select>
+                        <label>Search Description</label>
+                        <input id="searchDesc" placeholder="Search by description...">
+
+                        <button onclick="applyFilters()">Apply Filters</button>
+                    </div>
 
                 <table>
                     <thead>
@@ -82,8 +126,8 @@
                             <th>Account</th>
                             <th>Date</th>
                             <th>Description</th>
-                            <th>Method</th>
-                            <th>Recurring</th>
+                            <th>Tags</th>
+                            <th>Receipt</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -98,20 +142,6 @@
                 <div class="form-container">
                     <label>Amount</label>
                     <input id="incomeAmount" type="number">
-
-                    <label>Category</label>
-                    <select id="incomeCategory">
-                        <option>Salary</option>
-                        <option>Freelance</option>
-                        <option>Other</option>
-                    </select>
-
-                    <label>Account</label>
-                    <select id="incomeAccount">
-                        <option>Wallet</option>
-                        <option>Bank</option>
-                        <option>Savings</option>
-                    </select>
 
                     <label>Date</label>
                     <input id="incomeDate" type="date">
@@ -130,77 +160,111 @@
                 <div class="form-container">
                     <label>Monthly Budget</label>
                     <input id="monthlyBudgetInput" type="number">
-                    <button id="setBudgetBtn">Save Monthly Budget</button><br>
+                    <button id="setBudgetBtn">Save Monthly Budget</button>
 
-                    <br><p><strong>Budget:</strong> ₹<span id="budgetAmount">0</span></p>
                     <p><strong>Spent:</strong> ₹<span id="budgetSpent">0</span></p>
-                    <p><strong>Remaining:</strong> ₹<span id="budgetRemaining">0</span></p><br>
+                    <p><strong>Remaining:</strong> ₹<span id="budgetRemaining">0</span></p>
 
+                    <p><strong>Predicted Month-End Balance:</strong>
+                        ₹<span id="predictedBalance">0</span>
+                    </p>
+                     <p><strong>Budget Usage:</strong></p>
                     <div class="bar">
+                       
                         <div id="budgetFill" class="fill"></div>
                     </div>
                 </div>
-
                 <h3>Category Budget</h3>
+                <div class="form-container"> 
+                    <label>Category</label> 
+                    <select id="budgetCategory"> 
+                        <option>Food</option> 
+                        <option>Transport</option> 
+                        <option>Bills</option> 
+                        <option>Shopping</option> 
+                        <option>Entertainment</option> 
+                        <option>Health</option> 
+                        <option>Other</option> 
+                    </select> 
+                    <label>Budget Amount</label> 
+                    <input id="categoryBudgetInput" type="number"> 
+                    <button id="setCategoryBudgetBtn">Save Category Budget</button> 
+                </div> 
+                <table> 
+                    <thead> 
+                        <tr> 
+                            <th>Category</th> 
+                            <th>Budget</th> 
+                            <th>Spent</th> 
+                            <th>Remaining</th> 
+                            <th>Usage</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody id="categoryBudgetBody"></tbody> 
+                </table> 
+            </div>
+
+            <!-- BILLS -->
+            <div id="bills" class="section">
+                <h3>Bills & Reminders</h3>
 
                 <div class="form-container">
-                    <label>Category</label>
-                    <select id="budgetCategory">
-                        <option>Food</option>
-                        <option>Transport</option>
-                        <option>Bills</option>
-                        <option>Shopping</option>
-                        <option>Entertainment</option>
-                        <option>Health</option>
-                        <option>Other</option>
-                    </select>
+                    <label>Bill Name</label>
+                    <input id="billName">
+                    <p style="font-size:12px;color:gray;">
+Tip: Use the exact bill name in description of add expense form while adding a bill expense to mark it as paid automatically.
+</p><br>
 
-                    <label>Budget Amount</label>
-                    <input id="categoryBudgetInput" type="number">
-                    <button id="setCategoryBudgetBtn">Save Category Budget</button>
+
+                    <label>Amount</label>
+                    <input id="billAmount" type="number">
+
+                    <label>Due Date</label>
+                    <input id="billDate" type="date">
+
+                    <button id="addBillBtn">Add Bill</button>
                 </div>
 
                 <table>
                     <thead>
                         <tr>
-                            <th>Category</th>
-                            <th>Budget</th>
-                            <th>Spent</th>
-                            <th>Remaining</th>
-                            <th>Usage</th>
+                            <th>Bill</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="categoryBudgetBody"></tbody>
+                    <tbody id="billTable"></tbody>
                 </table>
             </div>
 
-            <!-- SUMMARY -->
-            <div id="summary" class="section">
-                <div class="summary-container">
-                    <div class="card" id="todayTotal">Today: ₹0</div>
-                    <div class="card" id="weekTotal">This Week: ₹0</div>
-                    <div class="card" id="monthTotal">This Month: ₹0</div>
-                    <div class="card" id="totalTransactions">Transactions: 0</div>
+            <!-- SUMMARY --> 
+             <div id="summary" class="section">
+                 <div class="summary-container">
+                     <div class="card" id="todayTotal">Today: ₹0</div> 
+                     <div class="card" id="weekTotal">This Week: ₹0</div> 
+                     <div class="card" id="monthTotal">This Month: ₹0</div>
+                      <div class="card" id="totalTransactions">Transactions: 0</div>
+                     </div>
+                      <table> 
+                        <thead> 
+                            <tr> <th>Category</th> <th>Total (₹)</th> </tr> 
+                        </thead> <tbody id="categoryTotalsBody"></tbody>
+                     </table> 
+                     <div id="categoryBreakdown"></div> 
                 </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Total (₹)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="categoryTotalsBody"></tbody>
-                </table>
-
-                <div id="categoryBreakdown"></div>
+                        
+            <!-- DATA IMPORT/EXPORT -->
+             
+              <div id="data" class="section">
+                <h3>Import or Export Data</h3>
                 <div class="form-container">
-                    <button id="exportBtn">Export Data</button>
-
-                    <input type="file" id="importFile" accept=".json">
-                    <button id="importBtn">Import Data</button>
+                         <button id="exportBtn">Export Data</button>
+                          <input type="file" id="importFile" accept=".json">
+                           <button id="importBtn">Import Data</button>
+                    </div>
                 </div>
-            </div>
+                
 
         </div>
     </div>

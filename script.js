@@ -2,16 +2,20 @@ let expenses = [];
 let incomes = [];
 let monthlyBudget = 0;
 let categoryBudgets = {};
+let bills = [];
+let budgetAlertLevel = 0; // prevents repeated alerts
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("addBtn").addEventListener("click", addExpense);
-    document.getElementById("addIncomeBtn").addEventListener("click", addIncome);
-    document.getElementById("setBudgetBtn").addEventListener("click", saveMonthlyBudget);
-    document.getElementById("setCategoryBudgetBtn").addEventListener("click", saveCategoryBudget);
+    addBtn.addEventListener("click", addExpense);
+    addIncomeBtn.addEventListener("click", addIncome);
+    setBudgetBtn.addEventListener("click", saveMonthlyBudget);
+    setCategoryBudgetBtn.addEventListener("click", saveCategoryBudget);
+    addBillBtn.addEventListener("click", addBill);
     exportBtn.addEventListener("click", exportData);
     importBtn.addEventListener("click", importData);
 });
 
+/* ---------------- SIDEBAR ---------------- */
 function openSection(id) {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.querySelectorAll(".side-tab").forEach(b => b.classList.remove("active"));
@@ -19,45 +23,93 @@ function openSection(id) {
     event.target.classList.add("active");
 }
 
-/* Income */
+/* ---------------- INCOME ---------------- */
 function addIncome() {
-    const amount = Number(incomeAmount.value);
-    const date = incomeDate.value;
-    if (!amount || !date) return alert("Enter valid income");
-    incomes.push({ amount });
+    const amt = Number(incomeAmount.value);
+    if (!amt) return alert("Invalid income");
+
+    incomes.push({ amount: amt });
     totalIncome.textContent = incomes.reduce((s, i) => s + i.amount, 0);
     updateBalance();
+
+    incomeAmount.value = "";
+    incomeDate.value = "";
 }
 
-/* Monthly Budget */
+/* ---------------- BUDGET ---------------- */
 function saveMonthlyBudget() {
     monthlyBudget = Number(monthlyBudgetInput.value);
-    budgetAmount.textContent = monthlyBudget;
+    budgetAlertLevel = 0;
     updateMonthlyBudget();
 }
 
 function updateMonthlyBudget() {
     const spent = expenses.reduce((s, e) => s + e.amount, 0);
+    const remaining = monthlyBudget - spent;
+
     budgetSpent.textContent = spent;
-    budgetRemaining.textContent = monthlyBudget - spent;
-    budgetFill.style.width = (spent / monthlyBudget) * 100 + "%";
+    budgetRemaining.textContent = remaining;
+
+    let percent = monthlyBudget ? (spent / monthlyBudget) * 100 : 0;
+    budgetFill.style.width = percent + "%";
+
+    applyBudgetColors(percent, budgetFill);
+    showBudgetAlerts(percent);
+
+    // Prediction
+    const daysPassed = new Date().getDate();
+    if (daysPassed > 0 && monthlyBudget) {
+        const dailyAvg = spent / daysPassed;
+        const daysInMonth = new Date(
+            new Date().getFullYear(),
+            new Date().getMonth() + 1,
+            0
+        ).getDate();
+        predictedBalance.textContent =
+            (monthlyBudget - dailyAvg * daysInMonth).toFixed(2);
+    }
 }
 
-/* Category Budget */
+/* ---------- COLOR & ALERTS ---------- */
+function applyBudgetColors(percent, el) {
+    if (percent < 80) el.style.background = "green";
+    else if (percent < 90) el.style.background = "orange";
+    else el.style.background = "red";
+}
+
+function showBudgetAlerts(percent) {
+    if (percent >= 100 && budgetAlertLevel < 100) {
+        alert("🚨 Budget exceeded!");
+        budgetAlertLevel = 100;
+    } else if (percent >= 90 && budgetAlertLevel < 90) {
+        alert("⚠️ 90% of budget used");
+        budgetAlertLevel = 90;
+    } else if (percent >= 80 && budgetAlertLevel < 80) {
+        alert("⚠️ 80% of budget used");
+        budgetAlertLevel = 80;
+    }
+}
+
+/* ---------------- CATEGORY BUDGET ---------------- */
 function saveCategoryBudget() {
     const cat = budgetCategory.value;
     const amt = Number(categoryBudgetInput.value);
     if (!amt) return alert("Invalid amount");
+
     categoryBudgets[cat] = amt;
     updateCategoryBudgetUI();
 }
 
 function updateCategoryBudgetUI() {
     categoryBudgetBody.innerHTML = "";
+
     for (let cat in categoryBudgets) {
-        const spent = expenses.filter(e => e.category === cat)
-                              .reduce((s, e) => s + e.amount, 0);
+        const spent = expenses
+            .filter(e => e.category === cat)
+            .reduce((s, e) => s + e.amount, 0);
+
         const percent = (spent / categoryBudgets[cat]) * 100;
+
         categoryBudgetBody.innerHTML += `
             <tr>
                 <td>${cat}</td>
@@ -68,127 +120,221 @@ function updateCategoryBudgetUI() {
                     <div class="bar">
                         <div class="fill" style="width:${percent}%"></div>
                     </div>
+                    <small>${percent.toFixed(1)}%</small>
                 </td>
             </tr>
         `;
     }
+
+    setTimeout(() => {
+        document
+            .querySelectorAll("#categoryBudgetBody .fill")
+            .forEach(bar => applyBudgetColors(parseFloat(bar.style.width), bar));
+    }, 0);
 }
 
-/* Expenses */
+/* ---------------- EXPENSES ---------------- */
 function addExpense() {
-    const amountInput = document.getElementById("amount");
-    const categoryInput = document.getElementById("category");
-    const accountInput = document.getElementById("expenseAccount");
-    const dateInput = document.getElementById("date");
-    const descInput = document.getElementById("desc");
-    const methodInput = document.getElementById("method");
-    const recurringInput = document.getElementById("recurring");
-
-    const amt = Number(amountInput.value);
-
-    if (!amt || amt <= 0) {
-        alert("Enter valid amount");
-        return;
-    }
+    const amt = Number(amount.value);
+    if (!amt) return alert("Invalid amount");
 
     const expense = {
         amount: amt,
-        category: categoryInput.value,
-        account: accountInput.value,
-        date: dateInput.value,
-        desc: descInput.value,
-        method: methodInput.value,
-        recurring: recurringInput.value
+        category: category.value,
+        account: expenseAccount.value,
+        date: date.value,
+        desc: desc.value,
+        tags: tags.value,
+        receipt: receipt.files[0]?.name || "",
+        method: method.value
     };
 
     expenses.push(expense);
+
+    // Auto bill update
+    if (expense.category === "Bills") {
+        bills.forEach(b => {
+            if (
+                b.status === "Pending" &&
+                expense.desc.toLowerCase().includes(b.name.toLowerCase())
+            ) {
+                b.status = "Paid";
+            }
+        });
+        renderBills();
+    }
 
     renderExpenses();
     updateMonthlyBudget();
     updateCategoryBudgetUI();
     updateBalance();
+    updateSummary();
 
-    // Clear form
-    amountInput.value = "";
-    descInput.value = "";
+    amount.value = desc.value = tags.value = "";
+    receipt.value = "";
 }
-
-
 
 function renderExpenses() {
     tableBody.innerHTML = "";
-
-    expenses.forEach((e, index) => {
+    expenses.forEach((e, i) => {
         tableBody.innerHTML += `
             <tr>
                 <td>${e.amount}</td>
                 <td>${e.category}</td>
                 <td>${e.account}</td>
-                <td>${e.date || "-"}</td>
-                <td>${e.desc || "-"}</td>
-                <td>${e.method}</td>
-                <td>${e.recurring}</td>
-                <td>
-                    <button onclick="deleteExpense(${index})">Delete</button>
-                </td>
+                <td>${e.date}</td>
+                <td>${e.desc}</td>
+                <td>${e.tags}</td>
+                <td>${e.receipt ? "📄" : "-"}</td>
+                <td><button onclick="deleteExpense(${i})">Delete</button></td>
             </tr>
         `;
     });
 }
 
-function deleteExpense(index) {
-    expenses.splice(index, 1);
-    renderExpenses();
-    updateMonthlyBudget();
-    updateCategoryBudgetUI();
-    updateBalance();
+/* ---------------- FILTERING ---------------- */
+function applyFilters() {
+    let filtered = [...expenses];
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+
+    if (dateFilter.value === "today") {
+        filtered = filtered.filter(e => e.date === today);
+    } else if (dateFilter.value === "week") {
+        const ws = new Date(now);
+        ws.setDate(now.getDate() - now.getDay());
+        filtered = filtered.filter(e => new Date(e.date) >= ws);
+    } else if (dateFilter.value === "month") {
+        filtered = filtered.filter(e => {
+            const d = new Date(e.date);
+            return d.getMonth() === now.getMonth();
+        });
+    }
+
+    if (filterCategory.value !== "all")
+        filtered = filtered.filter(e => e.category === filterCategory.value);
+
+    if (filterMethod.value !== "all")
+        filtered = filtered.filter(e => e.method === filterMethod.value);
+
+    if (searchDesc.value)
+        filtered = filtered.filter(e =>
+            e.desc.toLowerCase().includes(searchDesc.value.toLowerCase())
+        );
+
+    renderFilteredExpenses(filtered);
 }
 
-
-function updateBalance() {
-    const income = incomes.reduce((s, i) => s + i.amount, 0);
-    const expense = expenses.reduce((s, e) => s + e.amount, 0);
-    balance.textContent = income - expense;
+function renderFilteredExpenses(list) {
+    tableBody.innerHTML = "";
+    list.forEach(e => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${e.amount}</td>
+                <td>${e.category}</td>
+                <td>${e.account}</td>
+                <td>${e.date}</td>
+                <td>${e.desc}</td>
+                <td>${e.tags}</td>
+                <td>${e.receipt ? "📄" : "-"}</td>
+                <td>-</td>
+            </tr>
+        `;
+    });
 }
 
-function exportData() {
-    const data = {
-        expenses,
-        incomes,
-        monthlyBudget,
-        categoryBudgets
-    };
+/* ---------------- SUMMARY ---------------- */
+function updateSummary() {
+    const today = new Date().toISOString().split("T")[0];
+    const now = new Date();
+    const ws = new Date(now);
+    ws.setDate(now.getDate() - now.getDay());
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json"
+    let t = 0, w = 0, m = 0;
+    const catTotals = {};
+
+    expenses.forEach(e => {
+        const d = new Date(e.date);
+        if (e.date === today) t += e.amount;
+        if (d >= ws) w += e.amount;
+        if (d.getMonth() === now.getMonth()) m += e.amount;
+
+        catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
     });
 
+    todayTotal.textContent = `Today: ₹${t}`;
+    weekTotal.textContent = `This Week: ₹${w}`;
+    monthTotal.textContent = `This Month: ₹${m}`;
+    totalTransactions.textContent = `Transactions: ${expenses.length}`;
+
+    categoryTotalsBody.innerHTML = "";
+    for (let c in catTotals) {
+        categoryTotalsBody.innerHTML += `
+            <tr><td>${c}</td><td>₹${catTotals[c]}</td></tr>
+        `;
+    }
+}
+
+/* ---------------- BILLS ---------------- */
+function addBill() {
+    bills.push({
+        name: billName.value,
+        amount: Number(billAmount.value),
+        dueDate: billDate.value,
+        status: "Pending"
+    });
+    renderBills();
+    billName.value = billAmount.value = billDate.value = "";
+}
+
+function renderBills() {
+    billTable.innerHTML = "";
+    bills.forEach(b => {
+        billTable.innerHTML += `
+            <tr>
+                <td>${b.name}</td>
+                <td>₹${b.amount}</td>
+                <td>${b.dueDate}</td>
+                <td>${b.status}</td>
+            </tr>
+        `;
+    });
+}
+
+/* ---------------- BALANCE ---------------- */
+function updateBalance() {
+    const i = incomes.reduce((s, x) => s + x.amount, 0);
+    const e = expenses.reduce((s, x) => s + x.amount, 0);
+    balance.textContent = i - e;
+}
+
+/* ---------------- DATA ---------------- */
+function exportData() {
+    const blob = new Blob(
+        [JSON.stringify({ expenses, incomes, monthlyBudget, categoryBudgets, bills })],
+        { type: "application/json" }
+    );
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "expense-tracker-data.json";
+    a.download = "expense-tracker.json";
     a.click();
 }
 
-
 function importData() {
-    const file = importFile.files[0];
-    if (!file) return alert("Select a file first");
-
-    const reader = new FileReader();
-    reader.onload = () => {
-        const data = JSON.parse(reader.result);
-
-        expenses = data.expenses || [];
-        incomes = data.incomes || [];
-        monthlyBudget = data.monthlyBudget || 0;
-        categoryBudgets = data.categoryBudgets || {};
-
+    const r = new FileReader();
+    r.onload = () => {
+        const d = JSON.parse(r.result);
+        expenses = d.expenses || [];
+        incomes = d.incomes || [];
+        monthlyBudget = d.monthlyBudget || 0;
+        categoryBudgets = d.categoryBudgets || {};
+        bills = d.bills || [];
         renderExpenses();
+        renderBills();
+        updateSummary();
         updateMonthlyBudget();
         updateCategoryBudgetUI();
         updateBalance();
-
-        alert("Data imported successfully");
     };
-    reader.readAsText(file);
+    r.readAsText(importFile.files[0]);
 }
