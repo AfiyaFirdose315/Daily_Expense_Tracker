@@ -227,3 +227,74 @@ table button {
 #budgetFill {
     border-radius: 5px;
 }
+/* ===== DARK THEME ===== */
+body.dark {
+    background: #121212;
+}
+
+body.dark .app-container {
+    background: #1e1e1e;
+}
+
+body.dark .sidebar {
+    background: linear-gradient(180deg, #333, #111);
+}
+
+body.dark .side-tab {
+    color: #ddd;
+}
+
+body.dark .side-tab.active {
+    background: #ffffff;
+    color: #000;
+}
+
+body.dark table {
+    background: #2a2a2a;
+    color: white;
+}
+
+body.dark table th {
+    background: #444;
+}
+
+body.dark .form-container {
+    background: #2a2a2a;
+    color: white;
+}
+
+body.dark input,
+body.dark select,
+body.dark textarea {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+}
+
+body.dark .summary-container .card {
+    background: #333;
+    color: white;
+}
+
+body.dark h1,
+body.dark h2,
+body.dark h3,
+body.dark h4,
+body.dark h5,
+body.dark h6,
+body.dark label,
+body.dark p,
+body.dark strong {
+    color: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .layout {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+}

@@ -5,6 +5,7 @@ let categoryBudgets = {};
 let bills = [];
 let budgetAlertLevel = 0;
 let shownAlerts = {};
+let incomeExpenseChart, categoryPieChart, monthlyChart;
 
 function alertOnce(msg) {
     if (!shownAlerts[msg]) {
@@ -371,3 +372,95 @@ function importData() {
     };
     r.readAsText(importFile.files[0]);
 }
+
+function exportCSV() {
+    let csv = "Amount,Category,Date,Description,Payment Method\n";
+    expenses.forEach(e => {
+        csv += `${e.amount},${e.category},${e.date},"${e.desc}",${e.method}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "expenses.csv";
+    a.click();
+}
+
+
+
+function renderCharts() {
+    const totalIncome = incomes.reduce((s, i) => s + i.amount, 0);
+    const totalExpense = expenses.reduce((s, e) => s + e.amount, 0);
+
+    // Income vs Expense
+    if (incomeExpenseChart) incomeExpenseChart.destroy();
+    incomeExpenseChart = new Chart(
+        document.getElementById("incomeExpenseChart"),
+        {
+            type: "bar",
+            data: {
+                labels: ["Income", "Expenses"],
+                datasets: [{
+                    data: [totalIncome, totalExpense],
+                    backgroundColor: ["#4CAF50", "#F44336"]
+                }]
+            }
+        }
+    );
+
+    // Category Pie
+    const catTotals = {};
+    expenses.forEach(e => {
+        catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
+    });
+
+    if (categoryPieChart) categoryPieChart.destroy();
+    categoryPieChart = new Chart(
+        document.getElementById("categoryPieChart"),
+        {
+            type: "pie",
+            data: {
+                labels: Object.keys(catTotals),
+                datasets: [{
+                    data: Object.values(catTotals)
+                }]
+            }
+        }
+    );
+
+    // Monthly chart
+    const monthly = {};
+    expenses.forEach(e => {
+        const m = new Date(e.date).toLocaleString("default", { month: "short" });
+        monthly[m] = (monthly[m] || 0) + e.amount;
+    });
+
+    if (monthlyChart) monthlyChart.destroy();
+    monthlyChart = new Chart(
+        document.getElementById("monthlyChart"),
+        {
+            type: "line",
+            data: {
+                labels: Object.keys(monthly),
+                datasets: [{
+                    label: "Monthly Expenses",
+                    data: Object.values(monthly),
+                    borderColor: "#2c6ed5",
+                    fill: false
+                }]
+            }
+        }
+    );
+}
+
+// Call charts whenever data changes
+const originalAddExpense = addExpense;
+addExpense = function () {
+    originalAddExpense();
+    renderCharts();
+};
+
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+}
+

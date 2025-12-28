@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Daily Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -19,10 +20,10 @@
             <button class="side-tab" onclick="openSection('budget')">Budget</button>
             <button class="side-tab" onclick="openSection('bills')">Bills</button>
             <button class="side-tab" onclick="openSection('summary')">Summary</button>
+            <button class="side-tab" onclick="openSection('analytics')">Analytics</button>
             <button class="side-tab" onclick="openSection('data')">Import/Export Data</button>
-        </div>
-
-        <!-- CONTENT -->
+            <button class="side-tab" onclick="toggleTheme()">Toggle Theme</button>
+           </div>
         <div class="content">
 
             <!-- EXPENSES -->
@@ -256,15 +257,29 @@ Tip: Use the exact bill name in description of add expense form while adding a b
                      </table> 
                      <div id="categoryBreakdown"></div> 
                 </div>
+
+            <div id="analytics" class="section">
+                <h3>Analytics Dashboard</h3>
+
+                <canvas id="incomeExpenseChart" height="120"></canvas>
+                <br>
+
+                <canvas id="categoryPieChart" height="120"></canvas>
+                <br>
+
+                <canvas id="monthlyChart" height="120"></canvas>
+            </div>
+
                         
             <!-- DATA IMPORT/EXPORT -->
              
               <div id="data" class="section">
-                <h3>Import or Export Data</h3>
+                <h3>Import or Export</h3>
                 <div class="form-container">
-                         <button id="exportBtn">Export Data</button>
-                          <input type="file" id="importFile" accept=".json">
-                           <button id="importBtn">Import Data</button>
+                        <button onclick="exportCSV()">Export CSV</button><br><br>
+                        <button id="exportBtn">Export JSON</button>
+                        <input type="file" id="importFile" accept=".json">
+                        <button id="importBtn">Import JSON</button>
                     </div>
                 </div>
                 
